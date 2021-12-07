@@ -9,10 +9,42 @@ def find_skills(possible_skill_line):
     #proccessed_job_descriptions = read_proccessed_job_descritions()
     #processed_word_type_sentences = read_processed_word_type_sentences()
 
-    SKILLS_SECTION = ["What do you bring", "qualifications", "requirements", "responsibilities", "must haves", "What you will do"]
+    SKILLS_SECTION = [
+        "what do you bring",
+        "qualifications",
+        "requirements",
+        "must haves",
+        "what you will do",
+        "minimum requirements",
+        "preferred qualifications",
+        "skills",
+        "keys to your success",
+        "about you",
+        "required skills",
+        "who you are"
+    ]
+
+    OTHER_SECTIONS = [
+        "responsibilities",
+        "workplace information",
+        "about us",
+        "who we are",
+        "role location",
+        "position description",
+        "job duties and responsibilities",
+        "company overview",
+        "the position",
+        "join us",
+        "who we are",
+        "compensation and benefits",
+        "why work with us?",
+        "company overview",
+        "about the role",
+        "about the possition",
+    ]
 
     # following module 5 
-    # Noun phrase (e.g., Java, ability to work independently, university degree, written communication)
+    # Noun phrase (e.g. Java, ability to work independently, university degree, written communication)
         # Java -> NN
         # ability to work independently -> NN TO VB RB
         # university degree -> NN NN

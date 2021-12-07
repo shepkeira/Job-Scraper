@@ -5,15 +5,19 @@ import os
 import json
 
 if __name__ == "__main__":
-    file_name = "software_engineer.txt"
-    #file_name = "cashier.txt"
+    # file_name = "software_engineer.txt"
+    file_name = "cashier.txt"
     job_ids = []
     final_jobs = {}
     here = os.path.dirname(os.path.abspath(__file__))
     file_path = os.path.join(here, file_name)
-    write_file_name = "software_engineer_1.txt"
+    # write_file_name = "software_engineer_1.txt"
+    write_file_name = "cashier_1.txt"
+    # ids_file_name = "software_engineer_ids.txt"
+    ids_file_name = "cashier_ids.txt"
     write_here = os.path.dirname(os.path.abspath(__file__))
     write_file_path = os.path.join(write_here, write_file_name)
+    ids_file_path = os.path.join(write_here, "cashier_ids.txt")
     jobs = []
     with open(file_path, 'r') as f:
         jobs = f.readlines()
@@ -50,11 +54,14 @@ if __name__ == "__main__":
                 else:
                     continue
         except JSONDecodeError:
-            print(job)     
+            print(job)
+    with open(ids_file_path, 'w') as f:
+        f.write(','.join(job_ids))
+    job_values = final_jobs.values()
     with open(write_file_path, 'a') as f:
-        #print(len(final_jobs))
-        jobs_json = json.dumps(final_jobs, indent=4)
-        f.write(jobs_json)
+        for job in job_values:
+            f.write(json.dumps(job))
+            f.write('\n')
         
         
 
