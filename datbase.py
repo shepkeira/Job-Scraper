@@ -161,11 +161,22 @@ def load_backup():
         './backupDatabase/cluster.sql',
         './backupDatabase/cosine_matrix_cashier.sql',
         './backupDatabase/cosine_matrix_software.sql',
+        './backupDatabase/cosine_matrix_software_1.sql',
+        './backupDatabase/cosine_matrix_software_2.sql',
+        './backupDatabase/cosine_matrix_software_3.sql',
+        './backupDatabase/cosine_matrix_software_4.sql',
+        './backupDatabase/cosine_matrix_software_5.sql',
+        './backupDatabase/cosine_matrix_software_6.sql',
+        './backupDatabase/cosine_matrix_software_7.sql',
+        './backupDatabase/cosine_matrix_software_8.sql',
+        './backupDatabase/cosine_matrix_software_9.sql',
         './backupDatabase/ids.sql',
-        './backupDatabase/vectors.sql',
         './backupDatabase/raw_skills.sql',
         './backupDatabase/processed_skills.sql',
         './backupDatabase/jobs.sql',
+        './backupDatabase/vectors_cashier.sql',
+        './backupDatabase/vectors_software.sql',
+        './backupDatabase/vectors_software_1.sql'
     ]
     for script in script_file_paths:
         print("starting on script: " + script)
