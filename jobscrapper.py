@@ -38,7 +38,7 @@ def scrapweb(URL, job_title):
     for current_page in range(start, job_posts_desired, 10):
         #if we are not on the first page we need to add an extension
         extension = ""
-        if count != 0:
+        if start != 0:
             extension = "&start=" + str(current_page)
         url = URL + extension
         #logging for users to track the progress

@@ -23,23 +23,41 @@ TABLE_NAMES = {
     },
 }
 
+# this function takes in the job_title an calculates the clusters for that job's skills
 def cluster(job_title):
     conn = sql_connection()
     #get processed skills
-    # processed_skills = query_for_processed_skills(job_title, conn)
-    # get_document_vectors(conn, job_title, processed_skills) #only add vectors we don't have yet
-    #save document vectors to a table
-    #cacluate cosine matrix as [x,y] = z table columns x,y,z
-    # calculate_cosine_matrix(conn, job_title)
+    print("Calculating Document Vectors")
+    processed_skills = query_for_processed_skills(job_title, conn)
+    get_document_vectors(conn, job_title, processed_skills) #only add vectors we don't have yet
+    # #save document vectors to a table
+    # #cacluate cosine matrix as [x,y] = z table columns x,y,z
+    print("Cacluating Cosine Matrix")
+    calculate_cosine_matrix(conn, job_title)
     #cluster
+    print("Calculating Clusters")
     cluster_skills(conn, job_title)
     #save cluster assignments to table
     conn.close()
-    
-def calculate_cosine_matrix(conn, job_title):
-    vectors = query_for_vectors(job_title, conn)
-    values = get_cosine_matrix(vectors, conn, job_title)
 
+#this function finds the cosine matrix entry with the highest skill_id_i
+#this will give us our starting point to cacluate new cosine distances
+def query_for_vector_id(job_title, conn):
+    cursor = conn.cursor()
+    table = TABLE_NAMES[job_title]['matrix']
+    statement = "SELECT skill_id_i FROM "+ table +" ORDER BY skill_id_i DESC LIMIT 1"
+    cursor.execute(statement)
+    output = cursor.fetchall()
+    id = output[0][0]
+    cursor.close()
+    return id
+
+#this function retrives our document vectors, and calculates thier cosine distance
+def calculate_cosine_matrix(conn, job_title, last_id):
+    vectors = query_for_vectors(job_title, conn)
+    get_cosine_matrix(vectors, conn, job_title, last_id)
+
+#this function writes our cosine values to the cosine_matrix table
 def write_values(values, conn, job_title):
     cursor = conn.cursor()
     table = TABLE_NAMES[job_title]['matrix']
@@ -48,39 +66,51 @@ def write_values(values, conn, job_title):
     conn.commit()
     cursor.close()
 
-# input: a list of document vectors and the file names for each document
-# output: a matrix and a list of file_names in the order placed in the matrix
+# this function takes in the document_vectors, job_title, and a database connection
 def get_cosine_matrix(skills_vectors, conn, job_title):
-    # [{'id': ele[0], 'doc_vector': ele[1], 'skill_id': ele[2]}]
-    values = []
-    norms = {}
-    N = len(skills_vectors) #add something here to find the max id, and start from there?
-    for i in range(0, N-1):
+    values = [] # values to be entered into the database
+    norms = {} # the vector magnitude of the document vectors
+    #full length of the skills matrix
+    N = len(skills_vectors) 
+    # clear out old cosines since our document vecotors could change everytime
+    clear_old_consines_from_table(conn, job_title)
+    for i in range(0, N):
+        # we get our jth row and its skill_id, and document vector
         row_i = skills_vectors[i]
         skill_id_i = row_i['skill_id']
         vecotr_i = np.array(row_i['doc_vector'].split(",")).astype(np.float)
+        # if we have already calculated this norm we retirve it
+        # if not we calculate the norm for this vecotr and save it in norms
         if skill_id_i not in norms:
             norm_i = norm(vecotr_i)
             norms[skill_id_i] = norm_i
         else:
             norm_i = norms[skill_id_i]
-        for j in range(i+1, N-1):
+        # we start j at i+1 because we ignore diagonals (we don't need to cluster i with i)
+        for j in range(i+1, N):
+            # we get our jth row and its skill_id, and document vector
             row_j = skills_vectors[j]
             skill_id_j = row_j['skill_id']
             vecotr_j = np.array(row_j['doc_vector'].split(",")).astype(np.float)
+            # if we have already calculated this norm we retirve it
+            # if not we calculate the norm for this vecotr and save it in norms
             if skill_id_j not in norms:
                 norm_j = norm(vecotr_j)
                 norms[skill_id_j] = norm_j
             else:
                 norm_j = norms[skill_id_j]
+            # next we calculate the cosine similarity
             value_i_j = dot(vecotr_i, vecotr_j)/(norm_i*norm_j)
-            if value_i_j <= 1:
-                value = [skill_id_i, skill_id_j, value_i_j]
-                values.append(value)
+            # next we want to save all the vectors into value in the correct order
+            value = [skill_id_i, skill_id_j, value_i_j]
+            # then we append this to values
+            values.append(value)
+        # we write the contents of values to the cosine table
         write_values(values, conn, job_title)
+        # we reset values to an empty array to save memory
         values = []
-    return values
 
+# this function retrieves all the document vectors that have been caluclated
 def query_for_vectors(job_title, conn):
     cursor = conn.cursor()
     table = TABLE_NAMES[job_title]['vector']
@@ -92,51 +122,13 @@ def query_for_vectors(job_title, conn):
     rows = [{'id': ele[0], 'doc_vector': ele[1], 'skill_id': ele[2]} for ele in output]
     return rows
 
-# cos(theta) = d_1 dot d_2 / vect_mag(d_1) * vect_mag(d_2)
-# input: document vector (list) x 2
-# output: cosine similarity of vecotrs (num)
-def cosine_similarity(skill_vec_1, skill_vec_2):
-    dot_prod = dot_product(skill_vec_1, skill_vec_2)
-    if not dot_prod and dot_prod != 0:
-        print("Document Vecotors are not the same length")
-        return False
-    vec_1_mag = vector_magnitude(skill_vec_1)
-    vec_2_mag = vector_magnitude(skill_vec_2)
-    vec_mag_prod = vec_1_mag * vec_2_mag
-    if vec_mag_prod == 0:
-        return 0
-    cosine = dot_prod / vec_mag_prod
-    return cosine
-
-# input: a vector of indeterminate length
-# output: the magnitude the vector
-def vector_magnitude(vector):
-    vec_mag_sqared = 0
-    for value in vector:
-        vec_mag_sqared += value**2
-    vec_mag = math.sqrt(vec_mag_sqared)
-    return vec_mag
-
-# input: two vecotrs of the same length
-# output: dot product of vectors (num)
-def dot_product(vec_1, vec_2):
-    dot_prod = 0
-    length_1 = len(vec_1)
-    length_2 = len(vec_2)
-    if length_1 != length_2:
-        return False
-    for i in range(length_1):
-        di1 = vec_1[i]
-        di2 = vec_2[i]
-        dot_prod += di1 * di2
-    return dot_prod
-
-
-
+# this function will return all the stemmed words from the skills
 def term_freqency(skills_array):
     term_freq = {}
+    # for each skill split into terms
     for _id, skill in skills_array:
         skill = skill.split(" ")
+        # for each term increase the count or set it to 1
         for term in skill:
             if term in term_freq:
                 term_freq[term] =+ 1
@@ -144,21 +136,54 @@ def term_freqency(skills_array):
                 term_freq[term] = 1
     return term_freq
 
+# this will calculate the document vector for all the new processed_skills
 def get_document_vectors(conn, job_title, processed_skills):
-    #get document vector for each skill
+    #get id and document vector for each skill
     skills_array = [[ele['id'], ele['processed']] for ele in processed_skills]
     skills_length = len(processed_skills)
+    # find the term_frequency for all skills
     term_freq = term_freqency(skills_array)
+    # find all the terms
     terms = list(term_freq.keys())
+    # we store the document_vectors as [[id, [document vector]],[id, [document vector]],...]
     document_vectors = []
+    # clear out the old values as they have to be recalulated with our new term frequency
+    clear_old_vectors_from_table(conn, job_title)
+    # for each processed skill
     for id, skill in skills_array:
-        #terms, skill, skills_length, all_freq_matrix
+        # to calcualate the document vecotr we need 
+        #                    terms, skill, skills_length, all_freq_matrix
         dv = document_vector(terms, skill, skills_length, term_freq)
+        # save the document vector as a string
         dv_str = ','.join(str(x) for x in dv)
+        # save the row as id, document_vector_string
         row = [id, dv_str]
+        # add this row to our document_vectors
         document_vectors.append(row)
+    # write all the vectors to the database
     write_to_database(document_vectors, job_title, conn)
 
+# clear all the vectors from the table
+def clear_old_vectors_from_table(conn, job_title):
+    cursor = conn.cursor()
+    table = TABLE_NAMES[job_title]['vector']
+    statement = "DELETE FROM "+ table +";"
+    
+    cursor.execute(statement)
+    conn.commit()
+    cursor.close()
+
+# clear all the vectors from the table
+def clear_old_consines_from_table(conn, job_title):
+    cursor = conn.cursor()
+    table = TABLE_NAMES[job_title]['matrix']
+    statement = "DELETE FROM "+ table +";"
+    
+    cursor.execute(statement)
+    conn.commit()
+    cursor.close()
+
+# write the document vectors to the table
 def write_to_database(document_vectors, job_title, conn):
     cursor = conn.cursor()
     table = TABLE_NAMES[job_title]['vector']
@@ -167,7 +192,7 @@ def write_to_database(document_vectors, job_title, conn):
     conn.commit()
     cursor.close()
 
-
+# query to find all the proccessed skills
 def query_for_processed_skills(job_title, conn):
     cursor = conn.cursor()
     table = TABLE_NAMES[job_title]['processed']

@@ -1,7 +1,7 @@
 import math
 import numpy as np
 
-# input: a dictionary of skills: processed skills 
+# input: an array of proccessed skills 
 # output: a list of all the terms in the doucment (no duplicates)
 def all_terms(skills_array):
     terms = []

@@ -1,8 +1,6 @@
-import os
 import nltk
 from nltk.tokenize import word_tokenize, sent_tokenize
 from string import punctuation
-import json
 from findskills import find_skills
 from datbase import sql_connection
 
@@ -142,8 +140,10 @@ TABLE_NAMES = {
 #process the jobs to find only the skills sections, then process those skills sections to find only actual skills
 def process(job_title, last_job_id):
     #collect only lines from the skills seciton and write them to the table
+    print("Processing Files For Skills Sections")
     last_id = processfiles(job_title, last_job_id)
     #process all the skills and put them into a table
+    print("Processing Skills Section for Skills")
     processskills(job_title, last_id)
 
 #collect the job summary for all the jobs
