@@ -60,8 +60,6 @@ There is verious logging throught the code to keep track of progress
 ## The Code
 Exploring the codebase? Here is an explanation of some of the code:
 
-data this folder contains old data in txt, json, and pngs. Using in the inital creation of this project
-
 backupdatabase.sql contains all current data that can be loaded into the database
 
 datbase.py contains code for setting up the database, and connecting to it
