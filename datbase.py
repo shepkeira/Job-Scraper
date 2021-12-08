@@ -157,12 +157,26 @@ def create_database():
 # load the backup into our database
 def load_backup():
     conn = sql_connection()
-    script_file_path = './backupdatabase.sql'
-    file = open(script_file_path, 'r')
+    script_file_paths = [
+        './backupDatabase/cluster.sql',
+        './backupDatabase/cosine_matrix_cashier.sql',
+        './backupDatabase/cosine_matrix_software.sql',
+        './backupDatabase/ids.sql',
+        './backupDatabase/vectors.sql',
+        './backupDatabase/raw_skills.sql',
+        './backupDatabase/processed_skills.sql',
+        './backupDatabase/jobs.sql',
+    ]
+    for script in script_file_paths:
+        print("starting on script: " + script)
+        load_file_backup(script, conn)    
+    conn.close()
+
+def load_file_backup(script_file_path, conn):
+    file = open(script_file_path, 'r', encoding='utf-8')
     sql_script_string = file.read()
     file.close()
     cursor = conn.cursor()
     cursor.executescript(sql_script_string)
     conn.commit()
     cursor.close()
-    conn.close()
