@@ -10,6 +10,18 @@ JOBS = [
     {'URL': 'https://ca.indeed.com/jobs?q=cashier&l=canada&sort=date', 'job_title': 'cashier'},
 ]
 
+BEFORE_CLUTERING_SKILLS = {
+    'software_engineer': [],
+    'cashier': []
+}
+
+AFTER_CLUTERING_SKILLS = {
+    'software_engineer': [],
+    'cashier': []
+}
+
+
+
 def print_results():
     for job in JOBS:
         job_title = job['job_title']
@@ -17,9 +29,25 @@ def print_results():
         print("Before clustering")
         skills = top_two_skill_before_clustering(job_title)
         clustering_dist(skills)
+        BEFORE_CLUTERING_SKILLS[job_title] = BEFORE_CLUTERING_SKILLS[job_title] + skills
         print("After clustering")
         skills = top_two_skill_after_clustering(job_title)
         clustering_dist(skills)
+        AFTER_CLUTERING_SKILLS[job_title] = AFTER_CLUTERING_SKILLS[job_title] + skills
+    for n in range(0,2):
+        print("Comparing The Two Job Titles Before Clustering")
+        cashier_skills = BEFORE_CLUTERING_SKILLS['cashier']
+        software_engineer_skills = BEFORE_CLUTERING_SKILLS['software_engineer']
+        top_skills = [cashier_skills[n], software_engineer_skills[n]]
+        print("Skill " + str(n+1))
+        clustering_dist(top_skills)
+    for n in range(0,2):
+        print("Comparing The Two Job Titles AFTER Clustering")
+        cashier_skills = AFTER_CLUTERING_SKILLS['cashier']
+        software_engineer_skills = AFTER_CLUTERING_SKILLS['software_engineer']
+        top_skills = [cashier_skills[n], software_engineer_skills[n]]
+        print("Skill " + str(n+1))
+        clustering_dist(top_skills)
 
 def recluster_and_print_results():
     for job in JOBS:
@@ -28,7 +56,8 @@ def recluster_and_print_results():
         print("Before Clustering")
         skills = top_two_skill_before_clustering(job_title)
         clustering_dist(skills)
-        
+        BEFORE_CLUTERING_SKILLS[job_title] = BEFORE_CLUTERING_SKILLS[job_title] + skills
+
         # Clustering
         conn = sql_connection()
         cluster_skills(conn, job_title)
@@ -37,6 +66,21 @@ def recluster_and_print_results():
         print("After Clustering")
         skills = top_two_skill_after_clustering(job_title)
         clustering_dist(skills)
+        AFTER_CLUTERING_SKILLS[job_title] = AFTER_CLUTERING_SKILLS[job_title] + skills
+    for n in range(0,2):
+        print("Comparing The Two Job Titles Before Clustering")
+        cashier_skills = BEFORE_CLUTERING_SKILLS['cashier']
+        software_engineer_skills = BEFORE_CLUTERING_SKILLS['software_engineer']
+        top_skills = [cashier_skills[n], software_engineer_skills[n]]
+        print("Skill " + str(n+1))
+        clustering_dist(top_skills)
+    for n in range(0,2):
+        print("Comparing The Two Job Titles AFTER Clustering")
+        cashier_skills = AFTER_CLUTERING_SKILLS['cashier']
+        software_engineer_skills = AFTER_CLUTERING_SKILLS['software_engineer']
+        top_skills = [cashier_skills[n], software_engineer_skills[n]]
+        print("Skill " + str(n+1))
+        clustering_dist(top_skills)
 
 def calculate_new_results():
     for job in JOBS:
@@ -54,7 +98,8 @@ def calculate_new_results():
         print("Before Clustering")
         skills = top_two_skill_before_clustering(job_title)
         clustering_dist(skills)
-        
+        BEFORE_CLUTERING_SKILLS[job_title] = BEFORE_CLUTERING_SKILLS[job_title] + skills
+
         # Clustering
         print("Begining Clustering")
         cluster(job_title)
@@ -63,3 +108,43 @@ def calculate_new_results():
         print("After Clustering")
         skills = top_two_skill_after_clustering(job_title)
         clustering_dist(skills)
+        AFTER_CLUTERING_SKILLS[job_title] = AFTER_CLUTERING_SKILLS[job_title] + skills
+    for n in range(0,2):
+        print("Comparing The Two Job Titles Before Clustering")
+        cashier_skills = BEFORE_CLUTERING_SKILLS['cashier']
+        software_engineer_skills = BEFORE_CLUTERING_SKILLS['software_engineer']
+        top_skills = [cashier_skills[n], software_engineer_skills[n]]
+        print("Skill " + str(n+1))
+        clustering_dist(top_skills)
+    for n in range(0,2):
+        print("Comparing The Two Job Titles AFTER Clustering")
+        cashier_skills = AFTER_CLUTERING_SKILLS['cashier']
+        software_engineer_skills = AFTER_CLUTERING_SKILLS['software_engineer']
+        top_skills = [cashier_skills[n], software_engineer_skills[n]]
+        print("Skill " + str(n+1))
+        clustering_dist(top_skills)
+
+def calculate_new_results_without_clustering():
+    for job in JOBS:
+        url = job['URL']
+        job_title = job['job_title']
+        print("Starting on " + job_title)
+        # Scrap for jobs
+        last_job_id = query_for_last_id(job_title)
+        print("Web Scrapping")
+        scrapweb(url, job_title)
+        # Process jobs for skills
+        print("Processing Summaries")
+        process(job_title, last_job_id)
+        full_database_backup()
+        print("Before Clustering")
+        skills = top_two_skill_before_clustering(job_title)
+        clustering_dist(skills)
+        BEFORE_CLUTERING_SKILLS[job_title] = BEFORE_CLUTERING_SKILLS[job_title] + skills
+    for n in range(0,2):
+        print("Comparing The Two Job Titles Before Clustering")
+        cashier_skills = BEFORE_CLUTERING_SKILLS['cashier']
+        software_engineer_skills = BEFORE_CLUTERING_SKILLS['software_engineer']
+        top_skills = [cashier_skills[n], software_engineer_skills[n]]
+        print("Skill " + str(n+1))
+        clustering_dist(top_skills)

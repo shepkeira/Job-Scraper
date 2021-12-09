@@ -259,6 +259,8 @@ def processskills(job_title, last_id):
                 # if it is a skill (or many skills) add to our list
                 skills = skills + line_skill
             else:
+                # we keep track of non skills for observation 
+                # to see if we can imporve our find skills method to include more skills that are being missed
                 not_skills.append(line)
     # for each line we have determiend is a skill
     for skill in skills:
