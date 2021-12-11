@@ -38,6 +38,11 @@ def sql_job_table(conn):
                             company text,\
                             summary text)")
     conn.commit()
+    cursor_object.execute(
+        "CREATE TABLE software_id(id integer PRIMARY KEY AUTOINCREMENT,\
+                                    job_id text);"
+    )
+    conn.commit()
     
     cursor_object.execute(
         "CREATE TABLE cashier_job(id integer PRIMARY KEY AUTOINCREMENT,\
@@ -47,6 +52,12 @@ def sql_job_table(conn):
                             title text,\
                             company text,\
                             summary text)")
+    conn.commit()
+    cursor_object.execute(
+        "CREATE TABLE cashier_id(id integer PRIMARY KEY AUTOINCREMENT,\
+                                    job_id text);"
+
+    )
     conn.commit()
     cursor_object.close()
 
@@ -66,8 +77,7 @@ def full_database_backup():
     conn.close()
 
 # create our processed skills tables
-def create_processed_skills_tables():
-    conn = sql_connection()
+def create_processed_skills_tables(conn):
     cursor_object = conn.cursor()
     cursor_object.execute(
         "CREATE TABLE software_processed_skill(id integer PRIMARY KEY AUTOINCREMENT,\
@@ -151,7 +161,24 @@ def create_database():
     create_cluster_tables(conn)
     create_cosine_tables(conn)
     create_vecotr_tables(conn)
+    create_processed_skills_tables(conn)
+    conn.close()
 
+# load the backup into our database
+def load_jobs_backup():
+    conn = sql_connection()
+    script_file_paths = [
+        './backupDatabase/ids.sql',
+        './backupDatabase/jobs.sql',
+    ]
+    for script in script_file_paths:
+        print("starting on script: " + script)
+        load_file_backup(script, conn)  
+    sql_skill_table(conn)
+    create_processed_skills_tables(conn)
+    create_cluster_tables(conn)
+    create_cosine_tables(conn)
+    create_vecotr_tables(conn)  
     conn.close()
 
 # load the backup into our database

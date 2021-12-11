@@ -174,7 +174,7 @@ def query_for_last_id(job_title):
     output = cursor.fetchone()
     cursor.close()
     conn.close()
-    return output
+    return output[0]
 
 # new exception class for empty requests (we get a captcha)
 class EmtpyRequestError(Exception):

@@ -141,17 +141,18 @@ TABLE_NAMES = {
 def process(job_title, last_job_id):
     #collect only lines from the skills seciton and write them to the table
     print("Processing Files For Skills Sections")
-    last_id = processfiles(job_title, last_job_id)
+    last_id = processfiles(job_title, last_job_id) #10mins
     #process all the skills and put them into a table
     print("Processing Skills Section for Skills")
     processskills(job_title, last_id)
 
 #collect the job summary for all the jobs
 def query_for_job_summary(job_title, last_job_id):
+    last_job_id = last_job_id or -1
     conn = sql_connection()
     cursor = conn.cursor()
     table = TABLE_NAMES[job_title]['jobs']
-    statement = "SELECT full_summary FROM "+ table + " WHERE id > " + last_job_id
+    statement = "SELECT full_summary FROM "+ table + " WHERE id > " + str(last_job_id)
     
     cursor.execute(statement)
     output = cursor.fetchall()
@@ -162,10 +163,11 @@ def query_for_job_summary(job_title, last_job_id):
 
 #collect all the skills from the table
 def query_for_skills(job_title, last_id):
+    last_id = last_id or -1
     conn = sql_connection()
     cursor = conn.cursor()
     table = TABLE_NAMES[job_title]['skills']
-    statement = "SELECT skill FROM "+ table + " WHERE id > " + last_id + ";"
+    statement = "SELECT skill FROM "+ table + " WHERE id > " + str(last_id) + ";"
     
     cursor.execute(statement)
     output = cursor.fetchall()
@@ -183,7 +185,9 @@ def query_for_last_id(job_title):
     output = cursor.fetchone()
     cursor.close()
     conn.close()
-    return output
+    if output:
+        return output[0] 
+    return output 
     
 
 #process the jobs to find only the skills sections
@@ -218,7 +222,11 @@ def processfiles(job_title, last_job_id):
         # remove everything after the skills section
         only_skills = skills_and_beyond[:min_index]
         # tokenize so every time is a new item in our list
-        skill_sentences = sent_tokenize(only_skills)
+        skill_sentences = []
+        skill_lines = only_skills.split('\n')
+        for skill_line in skill_lines:
+            sentences = sent_tokenize(skill_line)
+            skill_sentences = skill_sentences + sentences
         # write each line of the skill section to the database
         # each line tends to be one skill
         write_skills_to_table(skill_sentences, job_title, conn)

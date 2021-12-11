@@ -28,12 +28,13 @@ def cluster(job_title):
     conn = sql_connection()
     #get processed skills
     print("Calculating Document Vectors")
-    processed_skills = query_for_processed_skills(job_title, conn)
-    get_document_vectors(conn, job_title, processed_skills) #only add vectors we don't have yet
+    ###############################################
+    # processed_skills = query_for_processed_skills(job_title, conn)
+    # get_document_vectors(conn, job_title, processed_skills) #only add vectors we don't have yet #10mins
     # #save document vectors to a table
     # #cacluate cosine matrix as [x,y] = z table columns x,y,z
     print("Cacluating Cosine Matrix")
-    calculate_cosine_matrix(conn, job_title)
+    calculate_cosine_matrix(conn, job_title) #2125 last to finish software
     #cluster
     print("Calculating Clusters")
     cluster_skills(conn, job_title)
@@ -53,9 +54,9 @@ def query_for_vector_id(job_title, conn):
     return id
 
 #this function retrives our document vectors, and calculates thier cosine distance
-def calculate_cosine_matrix(conn, job_title, last_id):
+def calculate_cosine_matrix(conn, job_title):
     vectors = query_for_vectors(job_title, conn)
-    get_cosine_matrix(vectors, conn, job_title, last_id)
+    get_cosine_matrix(vectors, conn, job_title)
 
 #this function writes our cosine values to the cosine_matrix table
 def write_values(values, conn, job_title):
@@ -73,8 +74,8 @@ def get_cosine_matrix(skills_vectors, conn, job_title):
     #full length of the skills matrix
     N = len(skills_vectors) 
     # clear out old cosines since our document vecotors could change everytime
-    clear_old_consines_from_table(conn, job_title)
-    for i in range(0, N):
+    # clear_old_consines_from_table(conn, job_title)
+    for i in range(5257, N): ##################################################
         # we get our jth row and its skill_id, and document vector
         row_i = skills_vectors[i]
         skill_id_i = row_i['skill_id']
