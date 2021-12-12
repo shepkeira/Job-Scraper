@@ -7,7 +7,7 @@ from hierarchical_clustering import cluster_skills
 
 JOBS = [
     {'URL': 'https://ca.indeed.com/jobs?q=software%20engineer&l=canada&sort=date', 'job_title': 'software_engineer'},
-    # {'URL': 'https://ca.indeed.com/jobs?q=cashier&l=canada&sort=date', 'job_title': 'cashier'},
+    {'URL': 'https://ca.indeed.com/jobs?q=cashier&l=canada&sort=date', 'job_title': 'cashier'},
 ]
 
 BEFORE_CLUTERING_SKILLS = {
@@ -190,4 +190,4 @@ def calculate_new_results_without_clustering():
         print("Skill " + str(n+1))
         clustering_dist(top_skills)
 
-calculate_new_results_no_new_jobs()
+# calculate_new_results_no_new_jobs()

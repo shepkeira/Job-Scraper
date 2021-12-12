@@ -101,57 +101,55 @@ The code itself is very slow to run.
 
 ## Expected results
 ### For software_engineer
+#### Before clustering                                                                                                        
+The top two skills are:
+"experience" with: 223
+and
+"python" with: 96
+The distance between these two skills is: 1.0
+#### After clustering
+The top two skills are:
+"experience" with: 3605
+and
+"job description:" with: 92
+The distance between these two skills is: 4.414213562373095                                                              
+### Starting on cashier
 #### Before clustering
 The top two skills are:
-"experience." with: 139
+"experience" with: 140
 and
-"java, c# or c++) experience with a scripting language (e.g." with: 88
-The distance between these two skills is: 16.1915082254503
+"ope" with: 73
+The distance between these two skills is: 2.414213562373095 
 #### After clustering
-The top two skills are: 
-"experience." with: 771
-and
-"experience on web service integration (rest, json, xml)." with: 77
-The distance between these two skills is: 17.06449510224598
-### For cashier
-#### Before clustering
 The top two skills are:
-"experience" with: 100
+"experience" with: 435 
 and
-"experience:sales: 1 year (preferred)customer service: 1 year (preferred)work remotely:no" with: 29
-The distance between these two skills is: 19.383361389586504
-#### After clustering
-The top two skills are: 
-"experience" with: 321
-and
-"experience for customers and delighting them every step of the way!" with: 21
-The distance between these two skills is: 15.925778320594745
+"ope" with: 75
+The distance between these two skills is: 2.414213562373095
 ### Comparing The Two Job Titles Before Clustering
 #### Skill 1
 The top two skills are:
-"experience" with: 100
+"experience" with: 140
 and
- "experience." with: 139
-The distance between these two skills is: 10.0
+"experience" with: 223
+The distance between these two skills is: 6.0
 Comparing The Two Job Titles Before Clustering
 #### Skill 2
 The top two skills are:
-"experience:sales: 1 year (preferred)customer service: 1 year (preferred)work remotely:no" with: 29
+"ope" with: 73
 and
- "java, c# or c++)
-experience with a scripting language (e.g." with: 88
-The distance between these two skills is: 53.944435102588656
+"python" with: 96
+The distance between these two skills is: 2.0
 ### Comparing The Two Job Titles AFTER Clustering
 #### Skill 1
 The top two skills are:
-"experience" with: 321
+"experience" with: 435
 and
-"experience." with: 771
-The distance between these two skills is: 10.0
-Comparing The Two Job Titles AFTER Clustering
+"experience" with: 3605 
+The distance between these two skills is: 6.0
 #### Skill 2
-The top two skills are: 
-"experience for customers and delighting them every step of the way!" with: 21
+The top two skills are:
+"ope" with: 75
 and
-"experience on web service integration (rest, json, xml)." with: 77
-The distance between these two skills is: 51.597610755825016
+"job description:" with: 92
+The distance between these two skills is: 3.0    

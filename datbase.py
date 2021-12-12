@@ -1,11 +1,14 @@
 import sqlite3
 import io
 from sqlite3 import Error
+import csv
+import os
+import re
 
 # make a connection to our database, or create a new one
 def sql_connection():
     try:
-        conn = sqlite3.connect('JobScrapper.db')
+        conn = sqlite3.connect('JobScrapper4.db')
         return conn
     except Error:
         print(Error)
@@ -60,6 +63,52 @@ def sql_job_table(conn):
     )
     conn.commit()
     cursor_object.close()
+
+def backup_many_files():
+    conn = sql_connection()
+    base_file = 'backupdatabase/backupdatabase_'
+    count = 0
+    file_count = 0
+    max_lines = 1000000
+    vector_max_lines = 5000
+    in_vectors = False
+    current_max_lines = max_lines
+
+    current_file = base_file + str(file_count) + ".sql"
+    p = io.open(current_file, 'w', encoding="utf-8")
+    for line in conn.iterdump():
+        count += 1
+        p.write('%s\n' % line)
+        if "_vectors" in line and "CREATE TABLE" in line:
+            in_vectors = True
+            p.write('%s\n' % "COMMIT;")
+            p.close()
+            count = 0
+            file_count += 1
+            current_file = base_file + str(file_count) + ".sql"
+            p = io.open(current_file, 'w', encoding="utf-8")
+            p.write('%s\n' % "BEGIN TRANSACTION;")
+            current_max_lines = vector_max_lines
+        if "CREATE TABLE" in line and "_vectors" not in line:
+            in_vectors = False
+            p.write('%s\n' % "COMMIT;")
+            p.close()
+            count = 0
+            file_count += 1
+            current_file = base_file + str(file_count) + ".sql"
+            p = io.open(current_file, 'w', encoding="utf-8")
+            p.write('%s\n' % "BEGIN TRANSACTION;")
+            current_max_lines = max_lines
+        if(count >= current_max_lines):
+            p.write('%s\n' % "COMMIT;")
+            p.close()
+            count = 0
+            file_count += 1
+            current_file = base_file + str(file_count) + ".sql"
+            p = io.open(current_file, 'w', encoding="utf-8")
+            p.write('%s\n' % "BEGIN TRANSACTION;")
+    conn.close()
+
 
 # backup the data in our database
 def backupdatabase(conn):
@@ -218,3 +267,44 @@ def load_file_backup(script_file_path, conn):
     cursor.executescript(sql_script_string)
     conn.commit()
     cursor.close()
+
+def load_cosine_cluster():
+    conn = sql_connection()
+    cur = conn.cursor()
+
+    table = "software_cosine_matrix"
+    statement = "DELETE FROM "+ table +";"
+    cur.execute(statement)
+    conn.commit()
+
+    with open('software_vectors.csv', 'r') as fin:
+        dr = csv.DictReader(fin)
+        to_db = [(i['skill_id_i'], i['skill_id_j'], i['value']) for i in dr]
+
+    cur.executemany("INSERT INTO " + table + " (skill_id_i, skill_id_j, value) VALUES (?, ?, ?);", to_db)
+    conn.commit()
+    conn.close()
+
+def load_database_from_folder():
+    conn = sql_connection()
+    files = os.listdir('./backupdatabase')
+    files = sorted_alphanumeric(files)
+    print(files)
+    for file in files:
+        if file.endswith(".sql"):
+            script = "./backupdatabase/" + file
+            print("starting on script: " + script)
+            load_file_backup(script, conn)
+    conn.close()
+
+def sorted_alphanumeric(data):
+    convert = lambda text: int(text) if text.isdigit() else text.lower()
+    alphanum_key = lambda key: [ convert(c) for c in re.split('([0-9]+)', key) ] 
+    return sorted(data, key=alphanum_key)
+
+def remove_old_databasefiles():
+    files = os.listdir('./backupdatabase')
+    for file in files:
+        if file.endswith(".sql"):
+            script = "./backupdatabase/" + file
+            os.remove(script)
