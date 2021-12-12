@@ -65,12 +65,13 @@ def sql_job_table(conn):
     cursor_object.close()
 
 def backup_many_files():
+    remove_old_databasefiles()
     conn = sql_connection()
     base_file = 'backupdatabase/backupdatabase_'
     count = 0
     file_count = 0
     max_lines = 1000000
-    vector_max_lines = 5000
+    vector_max_lines = 4000
     in_vectors = False
     current_max_lines = max_lines
 
