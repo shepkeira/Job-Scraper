@@ -1,5 +1,5 @@
 # Job-Scraper
-
+by Keira Shepherd
 ## Libraries needed
 
 To run this code you will need the following libraries. `pip install` should work for all of them, however it may be different for your system. Please test that you can import them in a python console/script before running the code.
@@ -26,38 +26,51 @@ The database is seperates data from different job titles into different tables.
 
 ### job table
 id is an integer user to identify each row
+
 summary_link is a string which contains the URL of the webpage which contains the full_summary for the job, the end of this URL is also the indeed job id for this job
+
 full_summary is a string containing the full summary of the job
 
 * There are other things collected in the jobs table however they did not end up being necessary
 
 ### id table
 id is an integer user to identify each row
+
 job_id is a string which is the job id from indeed
 
 ### skill table
 id is an integer user to identify each row
+
 skill is a string of the various skill collected from all the summaries
 
 ### processed_skill table
 id is an integer user to identify each row
+
 skill is a string of a skill collected from a summary
+
 processed_skill is a string of the skill after processing (no stop words, punctuation, stemmed)
 
 ### vectors table
 id is an integer user to identify each row
+
 doc_vector is a string containing the document vector for an id
+
 skill_id references a processed_skill id found in the processed_skill table
 
 #### cosine_matrix table
 id is an integer user to identify each row
+
 skill_id_i references a processed_skill id found in the processed_skill table
+
 skill_id_j references a processed_skill id found in the processed_skill table
+
 value is a float which is the cosine_similarity between the vectors created by skill_id_i and skill_id_j
 
 ### cluster table
 id is an integer user to identify each row
+
 skill_id references a processed_skill id found in the processed_skill table
+
 cluster is an integer which refers to which cluster the skill is in. All rows with the same cluster integer are in the same cluster.
 
 
@@ -95,6 +108,7 @@ from main import calculate_new_results_without_clustering
 calculate_new_results_without_clustering()
 ```
 
+To backup your database do the following
 ```
 from datbase import full_database_backup
 full_database_backup()
@@ -135,9 +149,13 @@ top_two.py this file calculates the top two skills and the bhattacharyya_coeffic
 
 ### Buggy Code
 At this time the code is not able to successfully collect all the requested jobs for various reasons.
+
 The part of speech tagging is not always accurate.
+
 The code itself is very slow to run.
+
 The code is not great at differentiating skills and non-skills.
+
 There are many response lines in the response and the results can be hard to follow.
 
 ## Expected results

@@ -2,7 +2,7 @@ from jobscrapper import scrapweb, query_for_last_id
 from datbase import full_database_backup, sql_connection, load_database_from_folder, empty_table
 from process_jobs import process
 from top_two import top_two_skill_before_clustering, clustering_dist, top_two_skill_after_clustering
-from skill_clustering import cluster, calculate_dendograms
+from skill_clustering import cluster
 from hierarchical_clustering import cluster_skills
 import sqlite3
 
