@@ -223,9 +223,15 @@ def processfiles(job_title, last_job_id):
         only_skills = skills_and_beyond[:min_index]
         # tokenize so every time is a new item in our list
         skill_sentences = []
+        # next we want to seperate as much as we can, by line, by comma, and then sentence_tokenization
+        # the comma is to separate lines like experience with python, bash, go, java
+        # into many skills
         skill_lines = only_skills.split('\n')
+        skill_parts = []
         for skill_line in skill_lines:
-            sentences = sent_tokenize(skill_line)
+            skill_parts = skill_parts + skill_line.split(',')
+        for skill_part in skill_parts:
+            sentences = sent_tokenize(skill_part)
             skill_sentences = skill_sentences + sentences
         # write each line of the skill section to the database
         # each line tends to be one skill

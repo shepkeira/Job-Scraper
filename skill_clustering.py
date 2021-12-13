@@ -30,9 +30,8 @@ def cluster(job_title):
     conn = sql_connection()
     #get processed skills
     print("Calculating Document Vectors")
-    ###############################################
-    # processed_skills = query_for_processed_skills(job_title, conn)
-    # get_document_vectors(conn, job_title, processed_skills) #only add vectors we don't have yet #10mins
+    processed_skills = query_for_processed_skills(job_title, conn)
+    get_document_vectors(conn, job_title, processed_skills) #only add vectors we don't have yet #10mins
     # #save document vectors to a table
     # #cacluate cosine matrix as [x,y] = z table columns x,y,z
     print("Cacluating Cosine Matrix")
@@ -72,67 +71,40 @@ def write_values(values, conn, job_title):
 # this function takes in the document_vectors, job_title, and a database connection
 def get_cosine_matrix(skills_vectors, conn, job_title):
     values = [] # values to be entered into the database
+    # clear out old cosines since our document vecotors could change everytime
     clear_old_consines_from_table(conn, job_title)
-
+    # for each vector we transform it from a string to a numpy array
+    # vectors becomes an array of numpy arrays
     vectors = [np.array(row_i['doc_vector'].split(",")).astype(np.float) for row_i in skills_vectors]
+    # skill_ids is an array of the skill_ids to maintian the order the vectors were sent in
+    # because the skill_ids are not garunteed to be in order from 0 to N
     skill_ids = [row_i['skill_id'] for row_i in skills_vectors]
+    # turn vectors into a numpy array
     numpyArray = np.array(vectors)
+    # create a sparse matrix from numpyArray
     sparse_matrix = sparse.csr_matrix(numpyArray)
+    # using the sparse matrix calcualte the cosine_similarity of the vectors, and turn the result into an array of arrays
     cosine_matrix = cosine_similarity(sparse_matrix, sparse_matrix, dense_output=False).toarray()
-
+    #full length of the skills matrix
     N = len(skills_vectors) 
     for i in range(0, N):
+        # we get our ith row and its skill_id
         row_i = skills_vectors[i]
         skill_id_i = row_i['skill_id']
+        # we start j at i+1 because we ignore diagonals (we don't need to cluster i with i)
         for j in range(i+1, N):
+            # we get our jth row and its skill_id
             row_j = skills_vectors[j]
             skill_id_j = row_j['skill_id']
+            # using our i and j values find the coresponding cosine value
             value_i_j = cosine_matrix[i][j]
+            # next we want to save all the vectors into value in the correct order
             value = [skill_id_i, skill_id_j, value_i_j]
+            # then we append this to values
             values.append(value)
+        # we write the contents of values to the cosine table
         write_values(values, conn, job_title)
         values = []
-    # values = [] # values to be entered into the database
-    # norms = {} # the vector magnitude of the document vectors
-    # #full length of the skills matrix
-    # N = len(skills_vectors) 
-    # # clear out old cosines since our document vecotors could change everytime
-    # # clear_old_consines_from_table(conn, job_title)
-    # for i in range(5257, N): ##################################################
-    #     # we get our jth row and its skill_id, and document vector
-    #     row_i = skills_vectors[i]
-    #     skill_id_i = row_i['skill_id']
-    #     vecotr_i = np.array(row_i['doc_vector'].split(",")).astype(np.float)
-    #     # if we have already calculated this norm we retirve it
-    #     # if not we calculate the norm for this vecotr and save it in norms
-    #     if skill_id_i not in norms:
-    #         norm_i = norm(vecotr_i)
-    #         norms[skill_id_i] = norm_i
-    #     else:
-    #         norm_i = norms[skill_id_i]
-    #     # we start j at i+1 because we ignore diagonals (we don't need to cluster i with i)
-    #     for j in range(i+1, N):
-    #         # we get our jth row and its skill_id, and document vector
-    #         row_j = skills_vectors[j]
-    #         skill_id_j = row_j['skill_id']
-    #         vecotr_j = np.array(row_j['doc_vector'].split(",")).astype(np.float)
-    #         # if we have already calculated this norm we retirve it
-    #         # if not we calculate the norm for this vecotr and save it in norms
-    #         if skill_id_j not in norms:
-    #             norm_j = norm(vecotr_j)
-    #             norms[skill_id_j] = norm_j
-    #         else:
-    #             norm_j = norms[skill_id_j]
-    #         # next we calculate the cosine similarity
-    #         value_i_j = dot(vecotr_i, vecotr_j)/(norm_i*norm_j)
-    #         # next we want to save all the vectors into value in the correct order
-    #         value = [skill_id_i, skill_id_j, value_i_j]
-    #         # then we append this to values
-    #         values.append(value)
-    #     # we write the contents of values to the cosine table
-    #     write_values(values, conn, job_title)
-    #     # we reset values to an empty array to save memory
-    #     values = []
 
 # this function retrieves all the document vectors that have been caluclated
 def query_for_vectors(job_title, conn):
